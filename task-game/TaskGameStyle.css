@@ -1,0 +1,83 @@
+  :root {
+    --purple-dark:   #5B2C8D;
+    --purple-mid:    #7D3C98;
+    --purple-light:  #D7BDE2;
+    --purple-pale:   #F5EEF8;
+    --green:         #1E8449;
+    --yellow:        #B7950B;
+    --red:           #C0392B;
+    --surface:       #ffffff;
+    --bg:            #F9F6FC;
+  }
+
+  body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; }
+
+  /* ── Header ── */
+  .app-header {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-mid) 100%);
+    color: #fff;
+    padding: 2rem 0 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 16px rgba(93,44,141,.25);
+  }
+  .app-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -.5px; }
+  .app-header p  { opacity: .8; margin-bottom: 0; font-size: .95rem; }
+
+  /* ── Progress bar ── */
+  .progress { height: 10px; border-radius: 99px; background: rgba(255,255,255,.25); }
+  .progress-bar { background: #fff; border-radius: 99px; }
+  .progress-label { font-size: .8rem; opacity: .85; }
+
+  /* ── Table ── */
+  .card { border: none; border-radius: 14px; box-shadow: 0 2px 18px rgba(93,44,141,.09); }
+  .table thead th {
+    background: var(--purple-mid);
+    color: #fff;
+    font-weight: 600;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    border: none;
+    padding: .9rem .75rem;
+  }
+  .table thead th:first-child { border-radius: 8px 0 0 0; }
+  .table thead th:last-child  { border-radius: 0 8px 0 0; }
+  .table tbody tr { transition: background .15s; }
+  .table tbody tr:hover { background: var(--purple-pale); }
+  .table tbody td { vertical-align: middle; padding: .75rem; border-color: #EDE6F5; font-size: .9rem; }
+
+  tr.done-row td:not(.actions-cell) { opacity: .45; text-decoration: line-through; }
+
+  /* ── Difficulty badges ── */
+  .badge-easy   { background: #D5F5E3; color: var(--green);  font-weight: 700; border-radius: 6px; padding: .3em .65em; font-size: .78rem; }
+  .badge-medium { background: #FEF9E7; color: var(--yellow); font-weight: 700; border-radius: 6px; padding: .3em .65em; font-size: .78rem; }
+  .badge-hard   { background: #FADBD8; color: var(--red);    font-weight: 700; border-radius: 6px; padding: .3em .65em; font-size: .78rem; }
+
+  /* ── Toolbar buttons ── */
+  .btn-add   { background: var(--purple-mid); color:#fff; border:none; }
+  .btn-add:hover { background: var(--purple-dark); color:#fff; }
+  .btn-reset { background:#fff; color: var(--purple-mid); border: 1.5px solid var(--purple-light); }
+  .btn-reset:hover { background: var(--purple-pale); color: var(--purple-dark); }
+
+  /* ── Row action buttons ── */
+  .btn-icon { border:none; background:transparent; padding:.2rem .4rem; border-radius:6px; line-height:1; }
+  .btn-icon.edit   { color: var(--purple-mid); }
+  .btn-icon.edit:hover   { background: var(--purple-pale); }
+  .btn-icon.delete { color: var(--red); }
+  .btn-icon.delete:hover { background: #FADBD8; }
+  .btn-icon.check  { color: var(--green); }
+  .btn-icon.check:hover  { background: #D5F5E3; }
+
+  /* ── Modal ── */
+  .modal-header { background: var(--purple-mid); color: #fff; border-radius: 12px 12px 0 0; }
+  .modal-header .btn-close { filter: invert(1); }
+  .modal-content { border-radius: 12px; border:none; }
+  .form-label { font-weight: 600; font-size: .85rem; color: #555; }
+  .form-control:focus, .form-select:focus { border-color: var(--purple-mid); box-shadow: 0 0 0 .2rem rgba(125,60,152,.2); }
+
+  /* ── DB alert ── */
+  .db-error { border-left: 4px solid var(--red); background:#FADBD8; border-radius:8px; }
+
+  /* ── Footer note ── */
+  .footer-note { text-align:center; color:#aaa; font-size:.8rem; padding: 1.5rem 0; }
+  .footer-note span { color: var(--purple-mid); }

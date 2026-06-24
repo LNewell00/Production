@@ -1,0 +1,281 @@
+/* ============================================================
+   Logan Newell — Resume Site
+   Palette pulled from odysseus_custom.json
+   bg: #f1f1f3 → warmed to cream #faf7f2
+   fg: #22212b
+   panel: #fafafa → #fffdf9
+   border: #b7b5ca
+   accent: #786ce0 (purple)
+   blossom: #f29cb3
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --cream:   #faf7f2;
+  --fg:      #22212b;
+  --panel:   #fffdf9;
+  --border:  #b7b5ca;
+  --purple:  #786ce0;
+  --purple-d:#5b50c4;
+  --purple-l:#ede9fb;
+  --blossom: #f29cb3;
+  --muted:   #7a7893;
+  --radius:  10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  background: var(--cream);
+  color: var(--fg);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Canvas ── */
+#blossom-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Navbar ── */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(250, 247, 242, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+}
+
+.navbar-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--purple) !important;
+  letter-spacing: 0.02em;
+}
+
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--fg) !important;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 1rem !important;
+  border-radius: var(--radius);
+  transition: background 0.18s, color 0.18s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--purple) !important;
+  background: var(--purple-l);
+}
+
+.navbar-toggler {
+  border-color: var(--border);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23786ce0' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* ── Page wrapper ── */
+.page-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+/* ── Section headings ── */
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--purple);
+  margin-bottom: 0.25rem;
+}
+
+.section-divider {
+  width: 48px;
+  height: 3px;
+  background: var(--blossom);
+  border-radius: 2px;
+  margin-bottom: 1.75rem;
+}
+
+/* ── Cards / panels ── */
+.card-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.25rem;
+  transition: box-shadow 0.2s;
+}
+
+.card-panel:hover {
+  box-shadow: 0 4px 20px rgba(120, 108, 224, 0.1);
+}
+
+/* ── Resume-specific ── */
+.resume-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.8rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--fg);
+}
+
+.resume-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
+
+.resume-meta a { color: var(--purple); text-decoration: none; }
+.resume-meta a:hover { text-decoration: underline; }
+
+.job-title {
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--fg);
+}
+
+.job-company {
+  font-weight: 400;
+  color: var(--purple);
+}
+
+.job-date {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.tag {
+  display: inline-block;
+  background: var(--purple-l);
+  color: var(--purple-d);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+  margin: 0.2rem 0.2rem 0.2rem 0;
+}
+
+.cert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--purple-l);
+  border: 1px solid var(--border);
+  color: var(--purple-d);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.4rem 0.9rem;
+  border-radius: 99px;
+  margin: 0.25rem;
+}
+
+.cert-badge svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+ul.styled {
+  list-style: none;
+  padding: 0;
+}
+
+ul.styled li {
+  padding: 0.3rem 0;
+  padding-left: 1.1rem;
+  position: relative;
+  font-size: 0.9rem;
+  color: var(--fg);
+}
+
+ul.styled li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--blossom);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+/* ── About ── */
+.about-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--purple-l);
+  border: 3px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  color: var(--purple);
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* ── Transcript placeholder ── */
+.placeholder-block {
+  background: var(--purple-l);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.placeholder-block svg {
+  width: 40px;
+  height: 40px;
+  color: var(--purple);
+  margin-bottom: 0.75rem;
+}
+
+/* ── Project cards ── */
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--purple);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 0.2rem 0.65rem;
+  margin-top: 0.5rem;
+  transition: background 0.15s;
+}
+
+.project-link:hover { background: var(--purple-l); color: var(--purple-d); }
+
+/* ── Footer ── */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Responsive ── */
+@media (max-width: 576px) {
+  .resume-name { font-size: 2rem; }
+  .page-content { padding: 2rem 1rem 4rem; }
+}
