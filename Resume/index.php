@@ -74,7 +74,7 @@ $site_tagline = 'Computer Science · Database Architecture · Backend Infrastruc
 
 <!-- Site scripts -->
 <script src="assets/js/blossoms.js"></script>
-<script src="assets/js/nav.js"></script>
+<script src="assets/js/nav.js?v=2"></script>
 
 </body>
 </html>
