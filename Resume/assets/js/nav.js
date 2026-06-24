@@ -1,12 +1,14 @@
 /**
  * Single-page navigation — shows/hides sections without reloading.
- * URL hash (#resume, #projects, #transcript, #about) drives active state.
+ * URL hash (#resume, #projects, #transcript, #about, #documents) drives active state.
  */
 (function () {
-  const PAGES = ['resume', 'projects', 'transcript', 'about'];
+  // 1. Array defined as lowercase 'pages'
+  const pages = ['resume', 'projects', 'transcript', 'about', 'documents'];
 
   function showPage(id) {
-    PAGES.forEach(p => {
+    // 2. FIXED: Changed from PAGES to pages
+    pages.forEach(p => {
       const el = document.getElementById('page-' + p);
       if (el) el.style.display = p === id ? 'block' : 'none';
     });
@@ -32,10 +34,12 @@
 
   /* honour hash on load */
   const hash = location.hash.replace('#', '');
-  showPage(PAGES.includes(hash) ? hash : 'resume');
+  // 3. FIXED: Changed from PAGES to pages
+  showPage(pages.includes(hash) ? hash : 'resume');
 
   window.addEventListener('popstate', () => {
     const h = location.hash.replace('#', '');
-    showPage(PAGES.includes(h) ? h : 'resume');
+    // 4. FIXED: Changed from PAGES to pages
+    showPage(pages.includes(h) ? h : 'resume');
   });
 })();
