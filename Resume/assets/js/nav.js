@@ -3,11 +3,9 @@
  * URL hash (#resume, #projects, #transcript, #about, #documents) drives active state.
  */
 (function () {
-  // 1. Array defined as lowercase 'pages'
   const pages = ['resume', 'projects', 'transcript', 'about', 'documents'];
 
   function showPage(id) {
-    // 2. FIXED: Changed from PAGES to pages
     pages.forEach(p => {
       const el = document.getElementById('page-' + p);
       if (el) el.style.display = p === id ? 'block' : 'none';
@@ -24,6 +22,7 @@
       const page = a.dataset.page;
       history.pushState(null, '', '#' + page);
       showPage(page);
+      
       /* collapse mobile navbar */
       const toggler = document.querySelector('.navbar-collapse');
       if (toggler && toggler.classList.contains('show')) {
@@ -34,12 +33,30 @@
 
   /* honour hash on load */
   const hash = location.hash.replace('#', '');
-  // 3. FIXED: Changed from PAGES to pages
   showPage(pages.includes(hash) ? hash : 'resume');
 
   window.addEventListener('popstate', () => {
     const h = location.hash.replace('#', '');
-    // 4. FIXED: Changed from PAGES to pages
     showPage(pages.includes(h) ? h : 'resume');
   });
+
+  /* ── Cleaned Dark Mode Cookie Toggle ── */
+  const darkToggle = document.getElementById('dark-toggle');
+  const htmlEl = document.documentElement;
+
+  if (darkToggle) {
+    darkToggle.addEventListener('click', () => {
+      // 1. Determine next theme state based on Bootstrap data attribute
+      const currentTheme = htmlEl.getAttribute('data-bs-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      // 2. Set client side updates instantly
+      htmlEl.setAttribute('data-bs-theme', newTheme);
+      darkToggle.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
+
+      // 3. Write value to document cookie
+      const maxAge = 365 * 24 * 60 * 60; 
+      document.cookie = `theme=${newTheme}; max-age=${maxAge}; path=/; SameSite=Lax`;
+    });
+  }
 })();

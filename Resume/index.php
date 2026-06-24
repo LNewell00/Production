@@ -2,9 +2,10 @@
 // ── Site config ──────────────────────────────────────────
 $site_name  = 'Logan Newell';
 $site_tagline = 'Computer Science · Database Architecture · Backend Infrastructure';
+$theme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="<?= htmlspecialchars($theme) ?>">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
