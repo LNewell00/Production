@@ -24,6 +24,25 @@
   --radius:  10px;
 }
 
+/* ── Dark mode ── */
+html[data-bs-theme="dark"] {
+  --cream:    #1a1920;
+  --fg:       #e8e6f0;
+  --panel:    #22212b;
+  --border:   #3d3b52;
+  --purple-l: #2a2640;
+  --purple-d: #a89ef0;
+  --muted:    #9997b0;
+}
+
+html[data-bs-theme="dark"] .navbar {
+  background: rgba(26, 25, 32, 0.88);
+}
+
+html[data-bs-theme="dark"] .card-panel:hover {
+  box-shadow: 0 4px 20px rgba(120, 108, 224, 0.18);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }

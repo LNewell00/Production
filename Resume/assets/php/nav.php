@@ -1,3 +1,6 @@
+<?php
+$theme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
+?>
 <nav class="navbar navbar-expand-md">
   <div class="container-fluid px-3">
     <a class="navbar-brand" href="#resume"><?= htmlspecialchars($site_name) ?></a>
@@ -30,6 +33,11 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" data-page="documents" href="#documents">Documents</a>
+        </li>
+        <li class="nav-item">
+          <button id="dark-toggle" class="nav-link border-0 bg-transparent" aria-label="Toggle dark mode">
+            <?= $theme === 'dark' ? '☀️' : '🌙' ?>
+          </button>
         </li>
       </ul>
     </div>
