@@ -12,10 +12,9 @@ handleAjaxActions($pdo);
 $active_tasks = [];
 $completed_tasks = [];
 $total_points_earned = 0;
-$max_allowed_points = 12; // Fallback default
+$max_allowed_points = 12;
 
 if ($pdo) {
-    // 1. Fetch Global Settings from DB
     $stmt = $pdo->prepare("SELECT setting_value FROM app_settings WHERE setting_key = 'cabinMaxPoints'");
     $stmt->execute();
     $setting = $stmt->fetch();
@@ -23,7 +22,6 @@ if ($pdo) {
         $max_allowed_points = (int)$setting['setting_value'];
     }
 
-    // 2. Fetch Tasks
     $all_tasks = $pdo->query("SELECT * FROM household_tasks ORDER BY sort_order ASC, id ASC")->fetchAll();
     foreach ($all_tasks as $t) {
         $isDone = ($t['done'] === 't' || $t['done'] === true || $t['done'] === 1 || $t['done'] === 'true');
@@ -45,7 +43,7 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
     <title>🐾 Pastel Cabin Task Game</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        .dragging { opacity: 0.4; scale: 0.99; background-color: #f3e8ff !important; box-shadow: 0 4px 12px rgba(147, 51, 234, 0.08); }
+        .dragging { opacity: 0.5; scale: 0.98; background-color: #f3e8ff !important; box-shadow: 0 8px 20px rgba(147, 51, 234, 0.15); z-index: 50; }
         
         @keyframes cozyPop {
             0% { transform: scale(1); }
@@ -92,13 +90,13 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
                 <span class="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-2">
                     🧹 Active Focus List (<span id="active-count"><?= count($active_tasks) ?></span> pending)
                 </span>
-                <span class="hidden sm:inline-block text-[10px] text-purple-500 font-medium">💡 Hint: Tap on a card to mark it complete!</span>
+                <span class="hidden sm:inline-block text-[10px] text-purple-500 font-medium">💡 Hint: Drag the ☰ handle to reorder assignments freely!</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse block md:table">
                     <thead class="hidden md:table-header-group">
                         <tr class="bg-slate-50/40 border-b border-slate-100 text-slate-400 font-bold text-xs uppercase tracking-wider">
-                            <th class="p-4 w-12 text-center">Move</th>
+                            <th class="p-4 w-12 text-center"></th>
                             <th class="p-4">Task Assignment</th>
                             <th class="p-4 w-32">Difficulty</th>
                             <th class="p-4 w-32">Est. Time</th>
@@ -203,7 +201,6 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
 
     <script>
         const taskCache = {};
-        // UPDATE: Max points initialized directly via dynamically server-rendered PHP variable values
         let maxAllowedTargetPoints = <?= $max_allowed_points ?>;
         let dragSrcEl = null;
 
@@ -213,15 +210,15 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
                 const doneAttr = row.getAttribute('data-done');
                 const isTaskDone = (doneAttr === 'true' || doneAttr === '1' || doneAttr === 't');
                 
-                const badgeEl = row.querySelector('td:nth-child(3) span');
+                const badgeEl = row.querySelector('.diff-badge-cell span');
                 let difficulty = 'Medium';
                 if (badgeEl) {
                     if (badgeEl.innerText.includes('Easy')) difficulty = 'Easy';
                     if (badgeEl.innerText.includes('Hard')) difficulty = 'Hard';
                 }
 
-                const timeText = row.querySelector('td:nth-child(4)').innerText.trim().replace('⏰ ', '');
-                const notesText = row.querySelector('td:nth-child(5)').innerText.trim();
+                const timeText = row.querySelector('.time-cell').innerText.trim();
+                const notesText = row.querySelector('.notes-cell').innerText.trim();
 
                 taskCache[id] = {
                     id: parseInt(id),
@@ -268,14 +265,12 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
             const textMuteClass = isDone ? 'line-through text-slate-400 italic font-medium' : 'text-slate-800 font-semibold';
 
             return `
-                <tr id="row-${t.id}" onclick="toggleTaskInline(${t.id}, event)" class="block md:table-row transition-all duration-200 border-b cursor-pointer select-none relative p-4 pb-14 md:p-0 mb-3 md:mb-0 rounded-xl md:rounded-none bg-white md:bg-transparent shadow-xs md:shadow-none border border-slate-100 md:border-none ${rowClass}" data-points="${t.points}" data-done="${isDone}">
-                    <td class="inline-block md:table-cell p-0 md:p-4 w-8 md:w-12 text-center text-slate-300 font-mono text-base drag-handle cursor-grab active:cursor-grabbing hover:text-purple-500 transition-colors align-middle">
-                        ☰
-                    </td>
+                <tr id="row-${t.id}" onclick="toggleTaskInline(${t.id}, event)" class="block md:table-row transition-all duration-200 border-b cursor-pointer select-none relative p-4 pl-12 pb-14 md:p-0 mb-3 md:mb-0 rounded-xl md:rounded-none bg-white md:bg-transparent shadow-xs md:shadow-none border border-slate-100 md:border-none ${rowClass}" data-points="${t.points}" data-done="${isDone}">
+                    <td class="absolute left-3 top-4 md:static md:table-cell p-0 md:p-4 text-center text-slate-300 hover:text-purple-500 font-bold text-lg cursor-grab active:cursor-grabbing select-none drag-handle-zone" title="Drag to reorder">☰</td>
                     <td class="block md:table-cell p-0 px-2 md:p-4 text-base md:text-sm tracking-tight task-title-cell mt-1 md:mt-0 ${textMuteClass}">${esc(t.task)}</td>
-                    <td class="inline-block md:table-cell p-0 pl-2 pr-4 md:p-4 mt-2 md:mt-0">${diffBadge(t.difficulty, t.points)}</td>
-                    <td class="inline-block md:table-cell p-0 md:p-4 text-xs font-semibold text-slate-400 bg-slate-100 md:bg-transparent px-2 py-0.5 rounded-md md:rounded-none mt-2 md:mt-0">⏰ ${esc(t.est_time || '—')}</td>
-                    <td class="block md:table-cell p-0 px-2 md:p-4 text-slate-400 italic text-xs max-w-full md:max-w-md truncate mt-2 md:mt-0">${esc(t.notes || '')}</td>
+                    <td class="inline-block md:table-cell p-0 pl-2 pr-4 md:p-4 mt-2 md:mt-0 diff-badge-cell">${diffBadge(t.difficulty, t.points)}</td>
+                    <td class="inline-block md:table-cell p-0 md:p-4 text-xs font-semibold text-slate-400 bg-slate-100 md:bg-transparent px-2 py-0.5 rounded-md md:rounded-none mt-2 md:mt-0 time-cell">${esc(t.est_time || '—')}</td>
+                    <td class="block md:table-cell p-0 px-2 md:p-4 text-slate-400 italic text-xs max-w-full md:max-w-md truncate mt-2 md:mt-0 notes-cell">${esc(t.notes || '')}</td>
                     <td class="absolute bottom-3 right-3 md:static md:table-cell p-0 md:p-4 text-center space-x-1.5 whitespace-nowrap">
                         <button onclick="openEditModal(${t.id})" class="inline-flex items-center bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-[11px] md:text-xs px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg border border-purple-200/40 cursor-pointer transition active:scale-95 shadow-2xs">✏️ Edit</button>
                         <button onclick="deleteTask(${t.id})" class="inline-flex items-center bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-700 font-bold text-[11px] md:text-xs px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg border border-slate-200/40 cursor-pointer transition active:scale-95 shadow-2xs">🗑️ Delete</button>
@@ -291,7 +286,7 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
         function toggleTaskInline(id, event) {
             if (event) {
                 const clickedElement = event.target;
-                if (clickedElement.closest('.drag-handle') || clickedElement.closest('button')) {
+                if (clickedElement.closest('button') || clickedElement.classList.contains('drag-handle-zone') || clickedElement.closest('tr').classList.contains('dragging')) {
                     return; 
                 }
             }
@@ -362,7 +357,6 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
         }
         function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
 
-        // UPDATE: Sends settings dynamically straight to the database back-end layer via POST request
         function saveSettings() {
             const val = parseInt(document.getElementById('settings-points').value || '12');
             const targetPoints = val > 0 ? val : 12;
@@ -443,7 +437,7 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
             document.querySelectorAll('tr[id^="row-"]').forEach(row => {
                 const doneAttr = row.getAttribute('data-done');
                 if (doneAttr === 'true' || doneAttr === '1' || doneAttr === 't') {
-                    sum += parseInt(row.getAttribute('data-points') || 0);
+                    sum += parseInt(row.getAttribute(['data-points'] || 0));
                 }
             });
 
@@ -469,11 +463,12 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
 
         function initializeDragAndDropEngine() {
             document.querySelectorAll('tr[id^="row-"]').forEach(row => {
-                const handle = row.querySelector('.drag-handle');
-                if (!handle) return;
+                const handleZone = row.querySelector('.drag-handle-zone');
+                if (!handleZone) return;
 
-                handle.onmousedown = () => row.setAttribute('draggable', 'true');
-                handle.onmouseup = () => row.removeAttribute('draggable');
+                // Desktop Mouse Handling
+                handleZone.onmousedown = () => row.setAttribute('draggable', 'true');
+                handleZone.onmouseup = () => row.removeAttribute('draggable');
 
                 row.addEventListener('dragstart', handleDragStart, false);
                 row.addEventListener('dragover', handleDragOver, false);
@@ -481,6 +476,51 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
                 row.addEventListener('dragleave', handleDragLeave, false);
                 row.addEventListener('drop', handleDrop, false);
                 row.addEventListener('dragend', handleDragEnd, false);
+
+                // Mobile Touch Handling: Zero Delay, Instant Reaction
+                let touchDraggingActive = false;
+
+                handleZone.addEventListener('touchstart', (e) => {
+                    touchDraggingActive = true;
+                    dragSrcEl = row;
+                    row.classList.add('dragging');
+                    if (navigator.vibrate) navigator.vibrate(15); // Quick snap vibration feedback
+                }, { passive: true });
+
+                handleZone.addEventListener('touchmove', (e) => {
+                    if (!touchDraggingActive || !dragSrcEl) return;
+
+                    // Instantly lock scrolling ONLY when finger is actively dragging the ☰ handle
+                    if (e.cancelable) e.preventDefault();
+
+                    const touch = e.touches[0];
+                    const elementOver = document.elementFromPoint(touch.clientX, touch.clientY);
+                    if (!elementOver) return;
+
+                    const targetRow = elementOver.closest('tr[id^="row-"]');
+                    if (targetRow && targetRow !== dragSrcEl && targetRow.parentNode === dragSrcEl.parentNode) {
+                        const rect = targetRow.getBoundingClientRect();
+                        const midPoint = (touch.clientY - rect.top) / (rect.bottom - rect.top);
+                        
+                        if (midPoint > 0.5) {
+                            targetRow.parentNode.insertBefore(dragSrcEl, targetRow.nextSibling);
+                        } else {
+                            targetRow.parentNode.insertBefore(dragSrcEl, targetRow);
+                        }
+                    }
+                }, { passive: false });
+
+                const clearTouchState = () => {
+                    if (touchDraggingActive && dragSrcEl) {
+                        saveDraggedSequenceOrder(dragSrcEl.parentNode);
+                        dragSrcEl.classList.remove('dragging');
+                    }
+                    dragSrcEl = null;
+                    touchDraggingActive = false;
+                };
+
+                handleZone.addEventListener('touchend', clearTouchState, { passive: true });
+                handleZone.addEventListener('touchcancel', clearTouchState, { passive: true });
             });
         }
 
@@ -521,6 +561,7 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
                 row.removeAttribute('draggable');
                 row.classList.remove('dragging', 'bg-purple-50/50');
             });
+            dragSrcEl = null;
         }
 
         function saveDraggedSequenceOrder(parentTbody) {
