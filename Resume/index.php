@@ -3,6 +3,12 @@
 $site_name  = 'Logan Newell';
 $site_tagline = 'Computer Science · Database Architecture · Backend Infrastructure';
 $theme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
+
+$host = getenv('DB_HOST') ?: 'postgres';
+$name = getenv('DB_NAME') ?: 'postgres';
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASS');
+
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="<?= htmlspecialchars($theme) ?>">
@@ -76,6 +82,55 @@ $theme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
 <!-- Site scripts -->
 <script src="assets/js/blossoms.js"></script>
 <script src="assets/js/nav.js?v=2"></script>
+<script>
+// 1. Maintain or assign an immutable session token for this browser tab
+if (!sessionStorage.getItem('site_session_id')) {
+    sessionStorage.setItem('site_session_id', crypto.randomUUID());
+}
+const sessionID = sessionStorage.getItem('site_session_id');
+
+// 2. Base payload submission engine
+function logEvent(eventType, targetName) {
+    const data = new URLSearchParams({
+        session_id: sessionID,
+        event_type: eventType,
+        target_name: targetName,
+        referrer: document.referrer,
+        screen_w: window.innerWidth,
+        screen_h: window.innerHeight
+    });
+
+    fetch('assets/php/log_visit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: data.toString()
+    }).catch(err => console.error("Tracking connection dropped or blocked", err));
+}
+
+// 3. Track entry milestone
+document.addEventListener("DOMContentLoaded", () => {
+    logEvent('page_view', 'index');
+});
+
+// 4. Track intentional navigation clicks 
+document.querySelectorAll('.nav-link, #nav-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+        const destination = link.getAttribute('href') || link.innerText;
+        logEvent('nav_click', destination.replace('#', ''));
+    });
+});
+
+// 5. Track file downloads targeting local PDFs
+document.querySelectorAll('a[href*=".pdf"]').forEach(pdfLink => {
+    pdfLink.addEventListener('click', () => {
+        const fileUrl = pdfLink.getAttribute('href');
+        const fileName = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
+        logEvent('pdf_download', fileName);
+    });
+});
+</script>
+
+
 
 </body>
 </html>
