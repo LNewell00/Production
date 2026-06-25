@@ -1,5 +1,5 @@
 <?php
-// includes/ajax-handlers.php
+// ajax-handlers.php
 
 function handleAjaxActions($pdo) {
     $is_ajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
@@ -16,28 +16,21 @@ function handleAjaxActions($pdo) {
         try {
             switch ($action) {
                 case 'add':
-                    $diff = $_POST['difficulty'] ?? 'Medium';
-                    $points = ($diff === 'Easy') ? 1 : (($diff === 'Hard') ? 3 : 2);
-
-                    $stmt = $pdo->prepare("INSERT INTO household_tasks (task, difficulty, points, est_time, notes, sort_order) VALUES (?,?,?,?,?, 9999) RETURNING *");
-                    $stmt->execute([trim($_POST['task']), $diff, $points, trim($_POST['est_time']), trim($_POST['notes'])]);
+                    $stmt = $pdo->prepare("INSERT INTO household_tasks (task, difficulty, est_time, notes) VALUES (?,?,?,?) RETURNING *");
+                    $stmt->execute([trim($_POST['task']), $_POST['difficulty'], trim($_POST['est_time']), trim($_POST['notes'])]);
                     echo json_encode(['ok' => true, 'row' => $stmt->fetch()]);
                     break;
 
                 case 'update':
-                    $diff = $_POST['difficulty'] ?? 'Medium';
-                    $points = ($diff === 'Easy') ? 1 : (($diff === 'Hard') ? 3 : 2);
-
-                    $stmt = $pdo->prepare("UPDATE household_tasks SET task=?, difficulty=?, points=?, est_time=?, notes=? WHERE id=? RETURNING *");
-                    $stmt->execute([trim($_POST['task']), $diff, $points, trim($_POST['est_time']), trim($_POST['notes']), (int)$_POST['id']]);
+                    $stmt = $pdo->prepare("UPDATE household_tasks SET task=?, difficulty=?, est_time=?, notes=? WHERE id=? RETURNING *");
+                    $stmt->execute([trim($_POST['task']), $_POST['difficulty'], trim($_POST['est_time']), trim($_POST['notes']), (int)$_POST['id']]);
                     echo json_encode(['ok' => true, 'row' => $stmt->fetch()]);
                     break;
 
                 case 'toggle':
                     $stmt = $pdo->prepare("UPDATE household_tasks SET done = NOT done WHERE id=? RETURNING done");
                     $stmt->execute([(int)$_POST['id']]);
-                    $result = $stmt->fetch();
-                    echo json_encode(['ok' => true, 'done' => $result['done']]);
+                    echo json_encode(['ok' => true, 'done' => $stmt->fetch()['done']]);
                     break;
 
                 case 'delete':
@@ -51,23 +44,12 @@ function handleAjaxActions($pdo) {
                     echo json_encode(['ok' => true]);
                     break;
 
-                case 'update_order':
-                    $ids = explode(',', $_POST['ids'] ?? '');
-                    $stmt = $pdo->prepare("UPDATE household_tasks SET sort_order = ? WHERE id = ?");
-                    foreach ($ids as $index => $id) {
-                        if (!empty($id)) {
-                            $stmt->execute([(int)$index, (int)$id]);
-                        }
-                    }
-                    echo json_encode(['ok' => true]);
-                    break;
-
                 default:
                     echo json_encode(['ok' => false, 'error' => 'Unknown action']);
             }
         } catch (PDOException $e) {
             echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
         }
-        exit;
+        exit; // Important: terminates execution so remaining HTML is not sent with AJAX response
     }
 }
