@@ -12,8 +12,18 @@ handleAjaxActions($pdo);
 $active_tasks = [];
 $completed_tasks = [];
 $total_points_earned = 0;
+$max_allowed_points = 12; // Fallback default
 
 if ($pdo) {
+    // 1. Fetch Global Settings from DB
+    $stmt = $pdo->prepare("SELECT setting_value FROM app_settings WHERE setting_key = 'cabinMaxPoints'");
+    $stmt->execute();
+    $setting = $stmt->fetch();
+    if ($setting) {
+        $max_allowed_points = (int)$setting['setting_value'];
+    }
+
+    // 2. Fetch Tasks
     $all_tasks = $pdo->query("SELECT * FROM household_tasks ORDER BY sort_order ASC, id ASC")->fetchAll();
     foreach ($all_tasks as $t) {
         $isDone = ($t['done'] === 't' || $t['done'] === true || $t['done'] === 1 || $t['done'] === 'true');
@@ -63,7 +73,7 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
                 <h2 class="font-bold text-base text-purple-950 flex items-center gap-2 tracking-tight">
                     🐕 Weekly Energy Level Gauge
                 </h2>
-                <span id="score-text" class="font-bold text-sm text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg"><?= $total_points_earned ?> / <span class="max-target-label">12</span> Points</span>
+                <span id="score-text" class="font-bold text-sm text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg"><?= $total_points_earned ?> / <span class="max-target-label"><?= $max_allowed_points ?></span> Points</span>
             </div>
             <div class="w-full bg-slate-100 h-5 rounded-full overflow-hidden relative border border-slate-200/40 shadow-inner">
                 <div id="progress-bar" class="h-full bg-gradient-to-r from-purple-400 to-purple-500 transition-all duration-500" style="width: 0%"></div>
@@ -150,9 +160,9 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Difficulty *</label>
                         <select id="f-difficulty" class="w-full mt-1.5 p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-400 focus:outline-none bg-slate-50 text-sm cursor-pointer">
-                            <option value="Easy">🥰 Easy (1pt)</option>
-                            <option value="Medium" selected>😐 Medium (2pt)</option>
-                            <option value="Hard">🫠 Hard (3pt)</option>
+                            <option value="Easy">🌿 Easy (1pt)</option>
+                            <option value="Medium" selected>🪵 Medium (2pt)</option>
+                            <option value="Hard">🏔️ Hard (3pt)</option>
                         </select>
                     </div>
                     <div>
@@ -193,7 +203,8 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
 
     <script>
         const taskCache = {};
-        let maxAllowedTargetPoints = parseInt(localStorage.getItem('cabinMaxPoints') || '12');
+        // UPDATE: Max points initialized directly via dynamically server-rendered PHP variable values
+        let maxAllowedTargetPoints = <?= $max_allowed_points ?>;
         let dragSrcEl = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -311,7 +322,6 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
             });
         }
 
-        // FIX: Replaced complete object rewrites with targeted token toggles 
         function updateSectionPlaceholders() {
             const activeCount = document.querySelectorAll('#active-tbody tr[id^="row-"]').length;
             const completedCount = document.querySelectorAll('#completed-tbody tr[id^="row-"]').length;
@@ -352,13 +362,21 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
         }
         function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
 
+        // UPDATE: Sends settings dynamically straight to the database back-end layer via POST request
         function saveSettings() {
             const val = parseInt(document.getElementById('settings-points').value || '12');
-            maxAllowedTargetPoints = val > 0 ? val : 12;
-            localStorage.setItem('cabinMaxPoints', maxAllowedTargetPoints.toString());
-            applyTargetPointsLabels();
-            recalculatePointsGauge();
-            closeSettingsModal();
+            const targetPoints = val > 0 ? val : 12;
+
+            post({ action: 'save_settings', points: targetPoints }).then(res => {
+                if (res.ok) {
+                    maxAllowedTargetPoints = targetPoints;
+                    applyTargetPointsLabels();
+                    recalculatePointsGauge();
+                    closeSettingsModal();
+                } else {
+                    alert('Could not update parameters globally.');
+                }
+            });
         }
 
         function applyTargetPointsLabels() {
@@ -420,7 +438,6 @@ $total_tasks = count($active_tasks) + count($completed_tasks);
             }
         }
 
-        // REVERSED DRAIN LOGIC SYSTEM
         function recalculatePointsGauge() {
             let sum = 0;
             document.querySelectorAll('tr[id^="row-"]').forEach(row => {

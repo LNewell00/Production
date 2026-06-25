@@ -62,6 +62,20 @@ function handleAjaxActions($pdo) {
                     echo json_encode(['ok' => true]);
                     break;
 
+                case 'save_settings':
+                    $points = isset($_POST['points']) ? (int)$_POST['points'] : 12;
+                    if ($points < 1) $points = 12;
+
+                    $stmt = $pdo->prepare("
+                        INSERT INTO app_settings (setting_key, setting_value) 
+                        VALUES ('cabinMaxPoints', :points) 
+                        ON CONFLICT (setting_key) 
+                        DO UPDATE SET setting_value = EXCLUDED.setting_value
+                    ");
+                    $ok = $stmt->execute(['points' => $points]);
+                    echo json_encode(['ok' => $ok]);
+                    break;
+
                 default:
                     echo json_encode(['ok' => false, 'error' => 'Unknown action']);
             }
