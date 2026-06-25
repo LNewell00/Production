@@ -7,7 +7,7 @@ function bootstrapDatabase($pdo) {
     }
 
     try {
-        // Safe check execution - will not overwrite or alter your active data records
+        // Safe check execution for core tasks table
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS household_tasks (
                 id         SERIAL PRIMARY KEY,
@@ -21,6 +21,19 @@ function bootstrapDatabase($pdo) {
                 created_at TIMESTAMPTZ DEFAULT NOW()
             );
         ");
+
+        // Universal app configurations table
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS app_settings (
+                setting_key   VARCHAR(50) PRIMARY KEY,
+                setting_value VARCHAR(255) NOT NULL
+            );
+        ");
+
+        // Seed default max points if missing
+        $stmt = $pdo->prepare("INSERT INTO app_settings (setting_key, setting_value) VALUES ('cabinMaxPoints', '12') ON CONFLICT DO NOTHING;");
+        $stmt->execute();
+
         return null; 
     } catch (PDOException $e) {
         return $e->getMessage();
